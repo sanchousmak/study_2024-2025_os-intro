@@ -1,0 +1,180 @@
+\documentclass[10pt,pdf,hyperref={unicode}]{beamer}
+
+\usepackage{fontspec}
+\usepackage{booktabs}
+\usepackage{polyglossia}
+\setmainlanguage{russian}
+\setotherlanguage{english}
+
+\newfontfamily\russianfont{FreeSerif}
+\newfontfamily\russianfontsf{FreeSans}
+\newfontfamily\russianfonttt{FreeMono}
+
+\setsansfont{FreeSans} 
+\setmonofont{FreeMono}
+
+\setbeamercolor{author in head/foot}{fg=white, bg=purple!80!black}
+\setbeamercolor{title in head/foot}{fg=white, bg=purple!60!black}
+\setbeamercolor{date in head/foot}{fg=white, bg=purple!40!black}
+
+\makeatletter
+\defbeamertemplate*{footline}{my theme}{
+    \leavevmode%
+    \hbox{%
+    \begin{beamercolorbox}[wd=.3\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+        \usebeamerfont{author in head/foot}\insertshortauthor
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.4\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+        \usebeamerfont{title in head/foot}\insertshorttitle
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.3\paperwidth,ht=2.25ex,dp=1ex,right]{date in head/foot}%
+        \usebeamerfont{date in head/foot}\insertshortdate{}\hspace*{2em}
+        \insertframenumber{} / \inserttotalframenumber\hspace*{2ex}
+    \end{beamercolorbox}}%
+}
+\makeatother
+
+\title[Алгоритмы замещения]{Сравнительный анализ алгоритмов замещения страниц}
+\author[Макаренко А. А.]{Макаренко Александра Александровна}
+\institute{НКАбд-07-25}
+\date{2 марта 2026 г.}
+
+\begin{document}
+
+\begin{frame}
+    \titlepage
+\end{frame}
+
+
+\begin{frame}{Алгоритм NRU}
+    \textbf{NRU (Not Recently Used)} выбирает для замещения страницу, не использовавшуюся в последнее время.
+    
+    \vspace{0.3cm} 
+    
+    Используются биты в таблице страниц:
+    \begin{itemize}
+        \item \textbf{R (Referenced):} 1 — было обращение, 0 — сбрасывается ОС.
+        \item \textbf{M (Modified):} 1 — страница изменена, 0 — после записи на диск. 
+    \end{itemize}
+
+    \begin{block}{Классы приоритетета на удаление:}
+        \begin{enumerate}
+            \item \textbf{Класс 0:} R=0, M=0 (не было обращений и изменений)
+            \item \textbf{Класс 1:} R=0, M=1 (не было обращений, было изменение)
+            \item \textbf{Класс 2:} R=1, M=0 (было обращение, не было изменений)
+            \item \textbf{Класс 3:} R=1, M=1 (были обращения и изменения)
+        \end{enumerate}
+    \end{block}
+\end{frame}
+
+\begin{frame}{Алгоритм NRU: Плюсы и минусы}
+    \begin{block}{Плюсы}
+        \begin{itemize}
+            \item \textbf{Эффективность:} быстрая реализация через аппаратные биты.
+            \item \textbf{Комплексность:} учитывает и активность, и изменения.
+            \item Работает лучше FIFO и \textbf{нет аномалии Биледи}.
+        \end{itemize}
+    \end{block}
+
+    \begin{alertblock}{Минусы}
+        \begin{itemize}
+            \item \textbf{Низкая точность:} менее точен, чем LRU.
+            \item Требует периодического обнуления бита R.
+            \item \textbf{Случайность:} выбор внутри класса случайный $\rightarrow$ возможна неоптимальная замена.
+        \end{itemize}
+    \end{alertblock}
+\end{frame}
+
+
+\begin{frame}{Алгоритм FIFO}
+    \textbf{FIFO (First In, First Out)} — простейший алгоритм: страница, которая зашла в память \textbf{первой}, первой её и \textbf{покидает}.
+
+    \vspace{0.3cm}
+
+    \begin{block}{Плюсы}
+        \begin{itemize}
+            \item \textbf{Простая реализация:} используется обычная очередь (queue).
+            \item \textbf{Экономичность:} практически не требует накладных расходов по памяти.
+        \end{itemize}
+    \end{block}
+
+    \begin{alertblock}{Минусы}
+        \begin{itemize}
+            \item \textbf{Низкая эффективность:} часто удаляет страницы, которые активно используются прямо сейчас.
+            \item \textbf{Аномалия Биледи:} парадоксальная ситуация, когда увеличение количества кадров памяти приводит к \textit{росту} числа ошибок страниц.
+        \end{itemize}
+    \end{alertblock}
+\end{frame}
+
+\begin{frame}{Алгоритм OPT (Optimal)}
+    \textbf{Теоретический идеал:} удаляет страницу, которая потребуется \textbf{позднее всех} в будущем (или не потребуется вовсе).
+
+    \begin{block}{Плюсы}
+        \begin{itemize}
+            \item Обеспечивает \textbf{минимально возможное} число ошибок страниц (page faults).
+            \item Служит «золотым стандартом» (эталоном) для оценки эффективности других алгоритмов.
+        \end{itemize}
+    \end{block}
+
+    \begin{alertblock}{Минусы}
+        \begin{itemize}
+            \item \textbf{Нереализуем:} ОС не может предсказать будущее поведение программ и последовательность запросов.
+        \end{itemize}
+    \end{alertblock}
+\end{frame}
+
+\begin{frame}{Алгоритм LRU (Least Recently Used)}
+    Основан на принципе локальности: если страница долго не использовалась, вероятно, она не понадобится и в ближайшем будущем.
+
+    \begin{block}{Плюсы}
+        \begin{itemize}
+            \item Высокая эффективность (по результатам близок к алгоритму OPT).
+            \item \textbf{Отсутствие аномалии Биледи} (относится к классу стековых алгоритмов).
+        \end{itemize}
+    \end{block}
+
+    \begin{alertblock}{Минусы}
+        \begin{itemize}
+            \item \textbf{Сложность:} требуется постоянное обновление данных при каждом обращении к памяти.
+            \item \textbf{Ресурсоемкость:} высокие затраты на поддержку списков или счетчиков времени.
+        \end{itemize}
+    \end{alertblock}
+\end{frame}
+
+\begin{frame}{Алгоритм NFU (Not Frequently Used)}
+    Алгоритм подсчитывает частоту обращений: на выход идет та страница, к которой обращались \textbf{реже всего}.
+
+    \begin{block}{Плюсы}
+        \begin{itemize}
+            \item Проще в реализации, чем LRU (не нужно хранить точный порядок всех обращений).
+            \item Меньше нагрузка на систему при каждом доступе.
+        \end{itemize}
+    \end{block}
+
+    \begin{alertblock}{Минусы}
+        \begin{itemize}
+            \item \textbf{«Плохая память»:} алгоритм помнит старые обращения. Страница, которая была популярна час назад, будет занимать место, даже если сейчас она не нужна.
+            \item Низкая адаптивность к смене фаз работы программы.
+        \end{itemize}
+    \end{alertblock}
+\end{frame}
+\begin{frame}{Сравнение алгоритмов замещения страниц}
+    \centering
+    
+    \resizebox{\textwidth}{!}{
+        \begin{tabular}{lcccc}
+            \toprule
+            \textbf{Алгоритм} & \textbf{Реализуемость} & \textbf{Интеллект} & \textbf{Производит.} & \textbf{Аномал.} \\
+            \midrule
+            OPT  & Нереализуем & Да (будущее) & Лучшее  & Нет \\
+            LRU  & Сложная     & Да (прошлое) & Высокая & Нет \\
+            NFU  & Средняя     & Частично     & Средняя & Нет \\
+            FIFO & Простая     & Нет          & Низкая  & Есть \\
+            NRU & Простая     & Частично          & Средняя/выше FIFO  & нет \\
+            \bottomrule
+        \end{tabular}
+    }
+\end{frame}
+
+
+\end{document}
