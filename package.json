@@ -1,0 +1,14 @@
+{
+  "name": "os-intro",
+  "version": "1.0.0",
+  "description": "Операционные системы",
+  "main": "index.js",
+  "repository": "https://github.com/sanchousmak/study_2024-2025_os-intro.git",
+  "author": "sanchousmak <sanchous.mak@gmail.com>",
+  "license": "CC-BY-4.0",
+    "config": {
+	"commitizen": {
+	    "path": "cz-customizable"
+	}
+    }
+}
